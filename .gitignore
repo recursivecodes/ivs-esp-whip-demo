@@ -1,0 +1,29 @@
+# ESP-IDF build artifacts
+build/
+sdkconfig
+sdkconfig.old
+dependencies.lock
+managed_components/
+
+# Personal configuration (keep your settings private)
+main/settings.h
+
+# IDE and system files
+.vscode/
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Cache directories
+.cache/
+__pycache__/
+*.pyc
+*.pyo
+
+# Temporary files
+*.tmp
+*.temp
