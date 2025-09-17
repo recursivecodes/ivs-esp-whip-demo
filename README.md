@@ -254,8 +254,7 @@ This demo uses the `esp_signaling_get_whip_impl` implementation to establish Web
 
 1. **Token Request**: Fetches a participant token from your configured endpoint
 2. **WHIP Handshake**: Exchanges SDP offers/answers with IVS WHIP endpoint
-3. **ICE Negotiation**: Establishes peer-to-peer connection using STUN/TURN servers
-4. **Media Streaming**: Transmits camera feed using H.264 video and audio codecs
+3. **Media Streaming**: Transmits camera feed using H.264 video and audio codecs
 
 For detailed WebRTC connection flow, refer to the [esp-webrtc documentation](https://github.com/espressif/esp-webrtc-solution/blob/main/components/esp_webrtc/README.md#typical-call-sequence-of-esp_webrtc).
 
