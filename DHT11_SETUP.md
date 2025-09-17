@@ -36,9 +36,9 @@ Based on the J1 header pinout, connect the DHT-11 as follows:
 
 | DHT-11 Pin | ESP32-P4 J1 Header | Wire Color (Suggested) |
 | ---------- | ------------------ | ---------------------- |
-| VCC (+)    | Pin 1 (3V3)        | Red                    |
-| DATA (OUT) | Pin 7 (GPIO23)     | Yellow/Green           |
-| GND (-)    | Pin 6 (GND)        | Black                  |
+| VCC (+)    | Pin 1 (3V3)        | Red 🔴                 |
+| DATA (OUT) | Pin 7 (GPIO23)     | Yellow/Green 🟢        |
+| GND (-)    | Pin 6 (GND)        | Black ⚫️              |
 
 ### Step-by-Step Wiring
 
