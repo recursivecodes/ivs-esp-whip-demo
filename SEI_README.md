@@ -4,16 +4,16 @@ This implementation provides SEI (Supplemental Enhancement Information) NAL unit
 
 ### ✅ CONFIRMED WORKING FEATURES:
 
--   **Live SEI Injection**: Real-time SEI data injection into WebRTC video streams
--   **Standards Compliant**: Proper H.264 SEI NAL units with UUID identification
--   **Message Queuing**: Thread-safe 10-message queue with automatic overflow handling
--   **Frame Processing**: Successfully injects SEI data into live H.264 frames
--   **Emulation Prevention**: Proper byte stuffing to avoid start code conflicts
--   **CLI Interface**: Complete command set for testing and monitoring
--   **Multiple Formats**: Support for text, JSON, and status messages
--   **WebRTC Integration**: Seamless integration with ESP WebRTC video pipeline
--   **Memory Safe**: Proper memory management with no leaks
--   **Performance Optimized**: Minimal impact on video streaming performance
+- **Live SEI Injection**: Real-time SEI data injection into WebRTC video streams
+- **Standards Compliant**: Proper H.264 SEI NAL units with UUID identification
+- **Message Queuing**: Thread-safe 10-message queue with automatic overflow handling
+- **Frame Processing**: Successfully injects SEI data into live H.264 frames
+- **Emulation Prevention**: Proper byte stuffing to avoid start code conflicts
+- **CLI Interface**: Complete command set for testing and monitoring
+- **Multiple Formats**: Support for text, JSON, and status messages
+- **WebRTC Integration**: Seamless integration with ESP WebRTC video pipeline
+- **Memory Safe**: Proper memory management with no leaks
+- **Performance Optimized**: Minimal impact on video streaming performance
 
 ### 🧪 VERIFIED LIVE STREAMING RESULTS:
 
@@ -30,22 +30,22 @@ SEI injected: 5208 -> 5568 bytes (+360)
 
 ## System Components
 
--   **`sei_publisher.h/c`**: Core SEI NAL unit creation and frame processing
--   **`sei_interface.h/c`**: Simple interface for SEI message publishing
--   **`video_sei_hook.h/c`**: Video frame interception and processing hooks
--   **WebRTC Integration**: Live video pipeline integration via frame callbacks
--   **CLI Commands**: Complete testing and monitoring interface
+- **`sei_publisher.h/c`**: Core SEI NAL unit creation and frame processing
+- **`sei_interface.h/c`**: Simple interface for SEI message publishing
+- **`video_sei_hook.h/c`**: Video frame interception and processing hooks
+- **WebRTC Integration**: Live video pipeline integration via frame callbacks
+- **CLI Commands**: Complete testing and monitoring interface
 
 ## Features
 
--   **Standards Compliant**: Creates proper H.264 SEI NAL units with UUID identification
--   **Thread Safe**: Uses FreeRTOS mutexes for safe multi-threaded operation
--   **Message Queuing**: Buffers SEI messages for insertion into video frames
--   **Reliability**: Configurable message repetition for robust delivery
--   **Emulation Prevention**: Proper byte stuffing to avoid start code conflicts
--   **Flexible Payloads**: Support for text, JSON, and custom data formats
--   **Live Integration**: Real-time injection into WebRTC video pipeline
--   **Statistics**: Frame processing and SEI insertion tracking
+- **Standards Compliant**: Creates proper H.264 SEI NAL units with UUID identification
+- **Thread Safe**: Uses FreeRTOS mutexes for safe multi-threaded operation
+- **Message Queuing**: Buffers SEI messages for insertion into video frames
+- **Reliability**: Configurable message repetition for robust delivery
+- **Emulation Prevention**: Proper byte stuffing to avoid start code conflicts
+- **Flexible Payloads**: Support for text, JSON, and custom data formats
+- **Live Integration**: Real-time injection into WebRTC video pipeline
+- **Statistics**: Frame processing and SEI insertion tracking
 
 ## Technical Implementation
 
@@ -61,25 +61,25 @@ The SEI system consists of three main layers:
 
 The system integrates with ESP WebRTC through an `on_video_send` callback mechanism:
 
--   **Callback-based**: Uses `on_video_send` callback to intercept video frames before transmission
--   **Non-intrusive**: No modification to core WebRTC library
--   **Optional**: Zero impact when SEI functionality is not used
--   **Memory Safe**: Proper memory management for modified frames
--   **Performance**: Minimal overhead per video frame
+- **Callback-based**: Uses `on_video_send` callback to intercept video frames before transmission
+- **Non-intrusive**: No modification to core WebRTC library
+- **Optional**: Zero impact when SEI functionality is not used
+- **Memory Safe**: Proper memory management for modified frames
+- **Performance**: Minimal overhead per video frame
 
 ### H.264 Compliance
 
--   **Proper NAL Units**: Creates standards-compliant SEI NAL units (type 6)
--   **Start Code Format**: Uses 4-byte start codes (`00 00 00 01`) matching video frames
--   **Emulation Prevention**: Protects payload data while preserving start codes
--   **UUID Identification**: Uses unique UUID `3f8a2b1c-4d5e-6f70-8192-a3b4c5d6e7f8`
+- **Proper NAL Units**: Creates standards-compliant SEI NAL units (type 6)
+- **Start Code Format**: Uses 4-byte start codes (`00 00 00 01`) matching video frames
+- **Emulation Prevention**: Protects payload data while preserving start codes
+- **UUID Identification**: Uses unique UUID `3f8a2b1c-4d5e-6f70-8192-a3b4c5d6e7f8`
 
 ## CLI Commands
 
--   `sei_text <message>` - Send text message via SEI
--   `sei_json <role> <content>` - Send JSON message via SEI
--   `sei_status` - Show SEI system status and statistics
--   `sei_clear` - Clear SEI message queue
+- `sei_text <message>` - Send text message via SEI
+- `sei_json <role> <content>` - Send JSON message via SEI
+- `sei_status` - Show SEI system status and statistics
+- `sei_clear` - Clear SEI message queue
 
 ## Configuration
 
@@ -91,16 +91,16 @@ The system integrates with ESP WebRTC through an `on_video_send` callback mechan
 
 ### Reliability Features
 
--   **Message Repetition**: Each message sent 3 times by default
--   **Queue Management**: 10-message buffer with overflow handling
--   **Error Recovery**: Graceful handling of memory allocation failures
+- **Message Repetition**: Each message sent 3 times by default
+- **Queue Management**: 10-message buffer with overflow handling
+- **Error Recovery**: Graceful handling of memory allocation failures
 
 ## Performance Characteristics
 
--   **Memory Usage**: ~50KB heap requirement for SEI system
--   **Processing Overhead**: <1ms per video frame for SEI injection
--   **Queue Latency**: Messages processed within 1-2 video frames
--   **Throughput**: Supports 30+ FPS video streaming with SEI injection
+- **Memory Usage**: ~50KB heap requirement for SEI system
+- **Processing Overhead**: <1ms per video frame for SEI injection
+- **Queue Latency**: Messages processed within 1-2 video frames
+- **Throughput**: Supports 30+ FPS video streaming with SEI injection
 
 ## Usage Example
 
