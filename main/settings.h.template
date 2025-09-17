@@ -75,6 +75,11 @@ extern "C" {
  */
 #define PARTICIPANT_NAME "esp32-p4"
 
+/**
+ * @brief  Enable automatic SEI test messages (sent every 3 seconds during streaming)
+ */
+#define SEI_ENABLE_TEST_MESSAGES true
+
 #ifdef __cplusplus
 }
 #endif

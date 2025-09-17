@@ -321,6 +321,8 @@ bool sei_publisher_process_frame(sei_publisher_handle_t handle,
     
     sei_publisher_t *publisher = (sei_publisher_t *)handle;
     
+
+    
     if (xSemaphoreTake(publisher->mutex, pdMS_TO_TICKS(10)) != pdTRUE) {
         // If we can't get the mutex quickly, just return original frame
         *output_size = frame_size;
@@ -332,18 +334,18 @@ bool sei_publisher_process_frame(sei_publisher_handle_t handle,
         return false;
     }
     
-    // If no messages queued, return original frame
+    // If no messages queued, return original frame without copying
     if (publisher->queue_count == 0) {
-        *output_size = frame_size;
-        *output_data = malloc(frame_size);
-        if (*output_data) {
-            memcpy(*output_data, frame_data, frame_size);
-        }
         xSemaphoreGive(publisher->mutex);
-        return (*output_data != NULL);
+        // Don't allocate new memory, just return false to indicate no processing needed
+        *output_data = NULL;
+        *output_size = 0;
+        return false; // This will cause the caller to use the original frame
     }
     
-    // Check if this is a keyframe (contains SPS/PPS/IDR)
+
+    
+    // Check if this is a keyframe (contains SPS/PPS/IDR) for logging purposes
     bool is_keyframe = false;
     if (frame_size >= 4) {
         // Look for SPS (NAL type 7), PPS (NAL type 8), or IDR (NAL type 5)
@@ -363,8 +365,25 @@ bool sei_publisher_process_frame(sei_publisher_handle_t handle,
         }
     }
     
-    // Only inject SEI into keyframes for reliable delivery
-    if (!is_keyframe) {
+    // Check available memory before processing - be more conservative
+    size_t free_heap = esp_get_free_heap_size();
+    if (free_heap < 100000) { // Need at least 100KB free to safely process frames
+        // Clear the queue to prevent it from filling up during low memory
+        int cleared_count = publisher->queue_count;
+        while (publisher->queue_count > 0) {
+            sei_message_t *msg = &publisher->message_queue[publisher->queue_head];
+            if (msg->payload) {
+                free(msg->payload);
+                msg->payload = NULL;
+            }
+            publisher->queue_head = (publisher->queue_head + 1) % SEI_MAX_QUEUE_SIZE;
+            publisher->queue_count--;
+        }
+        
+        if (cleared_count > 0) {
+            ESP_LOGW(TAG, "⚠️  Low memory (%zu bytes), cleared %d queued messages", free_heap, cleared_count);
+        }
+        
         *output_size = frame_size;
         *output_data = malloc(frame_size);
         if (*output_data) {
@@ -378,6 +397,7 @@ bool sei_publisher_process_frame(sei_publisher_handle_t handle,
     uint8_t *current_data = malloc(frame_size);
     size_t current_size = frame_size;
     if (!current_data) {
+        ESP_LOGE(TAG, "❌ Failed to allocate initial frame buffer (%zu bytes)", frame_size);
         xSemaphoreGive(publisher->mutex);
         return false;
     }
@@ -401,12 +421,14 @@ bool sei_publisher_process_frame(sei_publisher_handle_t handle,
                 current_data = new_data;
                 current_size = new_size;
             } else {
-                ESP_LOGE(TAG, "Failed to insert SEI unit (attempt %d)", i+1);
+                ESP_LOGE(TAG, "Failed to insert SEI unit (attempt %d) - memory allocation failed", i+1);
+                // Don't break, just skip this repetition but continue with the message
                 break;
             }
         }
         
-        ESP_LOGI(TAG, "📡 Inserted SEI unit: %zu bytes, repeated %d times", sei_size, msg->repeat_count);
+        ESP_LOGI(TAG, "📡 Inserted SEI unit: %zu bytes, repeated %d times (%s)", 
+                 sei_size, msg->repeat_count, is_keyframe ? "keyframe" : "regular frame");
         
         // Free message payload and advance queue
         free(msg->payload);
@@ -420,8 +442,8 @@ bool sei_publisher_process_frame(sei_publisher_handle_t handle,
     *output_size = current_size;
     
     if (processed_messages > 0) {
-        ESP_LOGI(TAG, "📡 Processed %d SEI messages, frame size: %zu -> %zu bytes", 
-                 processed_messages, frame_size, current_size);
+        ESP_LOGI(TAG, "📡 Processed %d SEI messages, frame size: %zu -> %zu bytes (%s)", 
+                 processed_messages, frame_size, current_size, is_keyframe ? "keyframe" : "regular frame");
     }
     
     xSemaphoreGive(publisher->mutex);

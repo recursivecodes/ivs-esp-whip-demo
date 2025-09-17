@@ -32,6 +32,7 @@
 #include "sei.h"
 #include "video_sei_hook.h"
 #include "esp_capture.h"
+
 // clang-format on
 #define RUN_ASYNC(name, body)                                                  \
   void run_async##name(void *arg) {                                            \
@@ -526,8 +527,9 @@ static void button_task(void *arg) {
   }
 }
 
-// SEI message task - sends test messages every 3 seconds
+// SEI message task - sends test messages every 3 seconds (if enabled)
 static void sei_message_task(void *arg) {
+#if SEI_ENABLE_TEST_MESSAGES
   ESP_LOGI(
       TAG,
       "📡 SEI message task started - sending test messages every 3 seconds");
@@ -562,6 +564,10 @@ static void sei_message_task(void *arg) {
     // Wait 3 seconds before next message
     vTaskDelay(pdMS_TO_TICKS(3000));
   }
+#else
+  ESP_LOGI(TAG, "📡 SEI test messages disabled in settings - task will exit");
+  vTaskDelete(NULL);
+#endif
 }
 
 static int network_event_handler(bool connected) {
@@ -636,8 +642,12 @@ void app_main(void) {
 
   // Create SEI message publishing task with larger stack and lower priority
   if (sei_system_active) {
+#if SEI_ENABLE_TEST_MESSAGES
     xTaskCreate(sei_message_task, "sei_message_task", 8192, NULL, 3, NULL);
-    ESP_LOGI(TAG, "📡 SEI message task created successfully");
+    ESP_LOGI(TAG, "📡 SEI test message task created successfully");
+#else
+    ESP_LOGI(TAG, "📡 SEI test messages disabled - task not created");
+#endif
   }
 
   // Re-enable WiFi to test without SEI code

@@ -42,6 +42,13 @@ static int sei_video_send_callback(esp_peer_video_frame_t *frame, void *ctx) {
     frame->data = sei_output_data;
     frame->size = sei_output_size;
     return 0; // Success
+  } else if (!result && sei_output_data == NULL && sei_output_size == 0) {
+    // No processing needed (no messages queued) - pass through original frame silently
+    return 0;
+  } else if (!result) {
+    ESP_LOGE(TAG, "❌ SEI frame processing failed - passing through original frame");
+    // Don't return error, just pass through the original frame
+    return 0;
   }
 
   // Return success (frame unchanged)

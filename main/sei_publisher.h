@@ -18,7 +18,7 @@ extern "C" {
 #define SEI_MAX_PAYLOAD_SIZE 400
 
 // Maximum number of queued messages
-#define SEI_MAX_QUEUE_SIZE 10
+#define SEI_MAX_QUEUE_SIZE 15
 
 // Default repeat count for reliability
 #define SEI_DEFAULT_REPEAT_COUNT 3

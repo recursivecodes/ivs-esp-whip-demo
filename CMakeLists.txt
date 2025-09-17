@@ -10,7 +10,7 @@ if("${IDF_TARGET}" STREQUAL "esp32p4")
 endif()
 
 # Update these paths to point to your local esp-webrtc-solution directory
-list(APPEND EXTRA_COMPONENT_DIRS "../../components")
-list(APPEND EXTRA_COMPONENT_DIRS "../common")
+list(APPEND EXTRA_COMPONENT_DIRS "/Users/shartodd/projects/demos/esp-webrtc-solution/components")
+list(APPEND EXTRA_COMPONENT_DIRS "/Users/shartodd/projects/demos/esp-webrtc-solution/solutions/common")
 
 project(ivs_whip_demo)

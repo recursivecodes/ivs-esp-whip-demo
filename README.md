@@ -8,11 +8,11 @@ This standalone demo shows how to use an ESP32-P4 board as a WHIP publish client
 
 ### Hardware Requirements
 
--   An [ESP32P4-Function-Ev-Board](https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32p4/esp32p4-function-ev-board/user_guide.html) (includes a SC2336 camera)
+-   An [ESP32P4-Function-Ev-Board](https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32p4/esp32-p4-function-ev-board/index.html) (includes a SC2336 camera)
 
 ### Software Requirements
 
--   ESP-IDF v5.4 or master branch
+-   ESP-IDF v5.4 or newer
 -   The [esp-webrtc-solution](https://github.com/espressif/esp-webrtc-solution) repository
 
 ### Amazon IVS Setup
@@ -56,6 +56,7 @@ Edit `main/settings.h` with your specific configuration:
 -   **STAGE_ARN**: Your Amazon IVS stage ARN (format: `arn:aws:ivs:region:account:stage/stage-id`)
 -   **TOKEN_API_URL**: Your token vending endpoint URL
 -   **PARTICIPANT_NAME**: Unique identifier for this ESP32 device
+-   **SEI_ENABLE_TEST_MESSAGES**: Enable/disable automatic SEI test messages (true/false)
 
 #### Token Vending Endpoint
 
@@ -71,8 +72,97 @@ The `TOKEN_API_URL` must point to a publicly accessible endpoint that:
         "attributes": { "username": "esp32-p4" }
     }
     ```
+-   Example response:
+    ```json
+    {
+        "attributes": { "username": "esp32-p4" },
+        "capabilities": ["PUBLISH"],
+        "duration": 60,
+        "expirationTime": "2025-09-16T21:53:01.000Z",
+        "participantId": "Y5qm2ej9FVBO",
+        "token": "eyJhbGciOiJLTVMiLCJ0eXAiOiJKV1QifQ..."
+    }
+    ```
 
-You can implement this using AWS Lambda, API Gateway, or any web service that can call the IVS `CreateParticipantToken` API.
+You can implement this using AWS Lambda or any web service that can call the IVS `CreateParticipantToken` API.
+
+#### Example Node.js Implementation
+
+Here's a complete AWS Lambda function using the AWS SDK for JavaScript v3:
+
+```javascript
+import { IVSRealTimeClient, CreateParticipantTokenCommand } from "@aws-sdk/client-ivs-realtime";
+
+const client = new IVSRealTimeClient({ region: "us-east-1" });
+
+export const handler = async (event) => {
+    try {
+        // Parse the request body
+        const body = JSON.parse(event.body);
+        const { stageArn, capabilities = ["PUBLISH"], attributes = {} } = body;
+
+        // Validate required parameters
+        if (!stageArn) {
+            return {
+                statusCode: 400,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ error: "stageArn is required" }),
+            };
+        }
+
+        // Create the participant token
+        const command = new CreateParticipantTokenCommand({
+            stageArn,
+            capabilities,
+            attributes,
+            duration: 60, // Token valid for 60 minutes
+        });
+
+        const response = await client.send(command);
+
+        return {
+            statusCode: 200,
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*", // Add CORS if needed
+            },
+            body: JSON.stringify({
+                token: response.participantToken.token,
+                participantId: response.participantToken.participantId,
+                expirationTime: response.participantToken.expirationTime,
+                capabilities: response.participantToken.capabilities,
+                attributes: response.participantToken.attributes,
+                duration: response.participantToken.duration,
+            }),
+        };
+    } catch (error) {
+        console.error("Error creating participant token:", error);
+        return {
+            statusCode: 500,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                error: "Failed to create participant token",
+                details: error.message,
+            }),
+        };
+    }
+};
+```
+
+Make sure your Lambda function has the necessary IAM permissions:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": ["ivs:CreateParticipantToken"],
+            "Resource": "arn:aws:ivs:*:*:stage/*"
+        }
+    ]
+}
+```
 
 ## Building and Flashing
 
@@ -112,6 +202,13 @@ You can control the device via serial console:
 ### SEI Publishing
 
 This demo includes SEI (Supplemental Enhancement Information) publishing capabilities for embedding metadata directly into H.264 video streams. For detailed information about SEI features, configuration, and usage, see [SEI_README.md](SEI_README.md).
+
+#### SEI Test Messages
+
+The demo can automatically send test SEI messages every 3 seconds during streaming. This feature is controlled by the `SEI_ENABLE_TEST_MESSAGES` setting in `main/settings.h`:
+
+-   Set to `true` to enable automatic test messages (default)
+-   Set to `false` to disable automatic test messages and only use manual CLI commands
 
 SEI CLI commands:
 
