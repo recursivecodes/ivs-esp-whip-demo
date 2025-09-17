@@ -57,6 +57,7 @@ Edit `main/settings.h` with your specific configuration:
 -   **TOKEN_API_URL**: Your token vending endpoint URL
 -   **PARTICIPANT_NAME**: Unique identifier for this ESP32 device
 -   **SEI_ENABLE_TEST_MESSAGES**: Enable/disable automatic SEI test messages (true/false)
+-   **SEI_ENABLE_DHT11**: Enable/disable DHT-11 sensor readings via SEI (true/false)
 
 #### Token Vending Endpoint
 
@@ -203,6 +204,10 @@ You can control the device via serial console:
 
 This demo includes SEI (Supplemental Enhancement Information) publishing capabilities for embedding metadata directly into H.264 video streams. For detailed information about SEI features, configuration, and usage, see [SEI_README.md](SEI_README.md).
 
+### DHT-11 Sensor Integration
+
+The demo supports optional DHT-11 temperature and humidity sensor integration that publishes sensor readings as JSON metadata via SEI every 5 seconds during streaming. Uses the reliable esp-idf-lib DHT component for robust sensor communication. For wiring instructions and configuration details, see [DHT11_SETUP.md](DHT11_SETUP.md).
+
 #### SEI Test Messages
 
 The demo can automatically send test SEI messages every 3 seconds during streaming. This feature is controlled by the `SEI_ENABLE_TEST_MESSAGES` setting in `main/settings.h`:
@@ -214,9 +219,15 @@ SEI CLI commands:
 
 -   `sei_text <message>` : Send text message via SEI
 -   `sei_json <role> <content>` : Send JSON message via SEI
+-   `sei_raw_json <json>` : Send raw JSON message via SEI without wrapping
 -   `sei_status` : Show SEI system status and statistics
 -   `sei_clear` : Clear SEI message queue
 -   `sei_test_hook` : Test SEI hook with fake frame (for debugging)
+
+DHT-11 CLI commands (when enabled):
+
+-   `dht11_read` : Manually read DHT-11 sensor and publish via SEI
+-   `dht11_status` : Show DHT-11 sensor status and last readings
 
 ### Viewing the Stream
 

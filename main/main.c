@@ -32,6 +32,11 @@
 #include "sei.h"
 #include "video_sei_hook.h"
 #include "esp_capture.h"
+#include "driver/gpio.h"
+#include "esp_timer.h"
+#if SEI_ENABLE_DHT11
+#include "dht.h"
+#endif
 
 // clang-format on
 #define RUN_ASYNC(name, body)                                                  \
@@ -43,6 +48,10 @@
 
 #define BUTTON_GPIO GPIO_NUM_35 // Use GPIO 35 (BOOT button)
 #define BUTTON_ACTIVE_LEVEL 0   // 0 for pull-up (pressed = LOW)
+
+// DHT-11 Configuration
+#define DHT11_GPIO GPIO_NUM_23  // GPIO23 (J1 Pin 7)
+#define DHT11_READ_INTERVAL_MS 5000  // Read every 5 seconds
 
 // Token API configuration
 // clang-format off
@@ -57,9 +66,20 @@ static bool last_button_state = true;  // Assume released initially (pull-up)
 static char *current_token = NULL;     // Dynamically fetched token
 static bool sei_system_active = false; // Track SEI system state
 
+#if SEI_ENABLE_DHT11
+static bool dht11_initialized = false;
+static float last_temperature = 0.0;
+static float last_humidity = 0.0;
+#endif
+
 // Forward declarations
 static bool fetch_token(void);
 static void sei_message_task(void *arg); // Temporarily removed
+#if SEI_ENABLE_DHT11
+static bool dht11_init(void);
+static bool dht11_read(float *temperature, float *humidity);
+static void dht11_task(void *arg);
+#endif
 
 static int start_publish(int argc, char **argv) {
   static bool sntp_synced = false;
@@ -221,6 +241,47 @@ static int sei_test_hook_cli(int argc, char **argv) {
   return 0;
 }
 
+#if SEI_ENABLE_DHT11
+static int dht11_read_cli(int argc, char **argv) {
+  if (!dht11_initialized) {
+    printf("DHT-11 sensor not initialized\n");
+    return -1;
+  }
+
+  float temperature, humidity;
+  if (dht11_read(&temperature, &humidity)) {
+    printf("🌡️ DHT-11 Reading: Temperature: %.1f°C, Humidity: %.1f%%\n", temperature, humidity);
+    
+    // Also send via SEI if system is active
+    if (sei_system_active) {
+      char json_message[250];
+      uint32_t timestamp = esp_timer_get_time() / 1000; // Convert to milliseconds
+      snprintf(json_message, sizeof(json_message),
+              "{\"sensor\":\"DHT11\",\"temperature_c\":%.1f,\"humidity_percent\":%.1f,\"timestamp\":%" PRIu32 ",\"status\":\"manual_read\",\"type\":\"sensor_data\"}",
+              temperature, humidity, timestamp);
+      
+      if (sei_send_raw_json(json_message)) {
+        printf("📤 DHT-11 data sent via SEI as raw JSON\n");
+      }
+    }
+  } else {
+    printf("❌ Failed to read DHT-11 sensor\n");
+  }
+  return 0;
+}
+
+static int dht11_status_cli(int argc, char **argv) {
+  printf("🌡️ DHT-11 Status:\n");
+  printf("  Initialized: %s\n", dht11_initialized ? "Yes" : "No");
+  printf("  GPIO Pin: %d\n", DHT11_GPIO);
+  printf("  Read Interval: %d seconds\n", DHT11_READ_INTERVAL_MS / 1000);
+  printf("  Last Temperature: %.1f°C\n", last_temperature);
+  printf("  Last Humidity: %.1f%%\n", last_humidity);
+  printf("  SEI Publishing: %s\n", (sei_system_active && publishing_active) ? "Active" : "Inactive");
+  return 0;
+}
+#endif
+
 static int sei_clear_cli(int argc, char **argv) {
   if (!sei_system_active) {
     printf("SEI system not active\n");
@@ -229,6 +290,25 @@ static int sei_clear_cli(int argc, char **argv) {
 
   sei_clear_queue();
   printf("SEI queue cleared\n");
+  return 0;
+}
+
+static int sei_raw_json_cli(int argc, char **argv) {
+  if (argc < 2) {
+    printf("Usage: sei_raw_json <json_string>\n");
+    return -1;
+  }
+
+  if (!sei_system_active) {
+    printf("SEI system not active\n");
+    return -1;
+  }
+
+  if (sei_send_raw_json(argv[1])) {
+    printf("SEI raw JSON message queued: %s\n", argv[1]);
+  } else {
+    printf("Failed to queue SEI raw JSON message\n");
+  }
   return 0;
 }
 
@@ -316,6 +396,23 @@ static int init_console() {
           .help = "Test SEI hook with fake frame\r\n",
           .func = sei_test_hook_cli,
       },
+      {
+          .command = "sei_raw_json",
+          .help = "Send raw JSON message via SEI: sei_raw_json <json>\r\n",
+          .func = sei_raw_json_cli,
+      },
+#if SEI_ENABLE_DHT11
+      {
+          .command = "dht11_read",
+          .help = "Read DHT-11 sensor manually\r\n",
+          .func = dht11_read_cli,
+      },
+      {
+          .command = "dht11_status",
+          .help = "Show DHT-11 sensor status\r\n",
+          .func = dht11_status_cli,
+      },
+#endif
   };
   for (int i = 0; i < sizeof(cmds) / sizeof(cmds[0]); i++) {
     ESP_ERROR_CHECK(esp_console_cmd_register(&cmds[i]));
@@ -527,6 +624,98 @@ static void button_task(void *arg) {
   }
 }
 
+#if SEI_ENABLE_DHT11
+// DHT-11 sensor functions
+static bool dht11_init(void) {
+  // The esp-idf-lib DHT library handles GPIO configuration internally
+  dht11_initialized = true;
+  ESP_LOGI(TAG, "🌡️  DHT-11 sensor initialized on GPIO%d using esp-idf-lib", DHT11_GPIO);
+  
+  // Wait a bit for sensor to stabilize
+  vTaskDelay(pdMS_TO_TICKS(2000));
+  
+  // Test initial read
+  float test_temp, test_hum;
+  if (dht11_read(&test_temp, &test_hum)) {
+    ESP_LOGI(TAG, "✅ DHT-11 initial test successful: %.1f°C, %.1f%%", test_temp, test_hum);
+  } else {
+    ESP_LOGW(TAG, "⚠️ DHT-11 initial test failed - sensor may need more time to stabilize");
+  }
+  
+  return true;
+}
+
+static bool dht11_read(float *temperature, float *humidity) {
+  if (!dht11_initialized) {
+    ESP_LOGW(TAG, "DHT-11 not initialized");
+    return false;
+  }
+
+  int16_t temp_raw, hum_raw;
+  esp_err_t result = dht_read_data(DHT_TYPE_DHT11, DHT11_GPIO, &hum_raw, &temp_raw);
+  
+  if (result == ESP_OK) {
+    *temperature = (float)temp_raw / 10.0;
+    *humidity = (float)hum_raw / 10.0;
+    
+    // Sanity check values
+    if (*humidity < 0 || *humidity > 100 || *temperature < -40 || *temperature > 80) {
+      ESP_LOGW(TAG, "DHT-11 values out of range: T=%.1f°C, H=%.1f%%", *temperature, *humidity);
+      return false;
+    }
+    
+    ESP_LOGD(TAG, "DHT-11 read successful: T=%.1f°C, H=%.1f%%", *temperature, *humidity);
+    return true;
+  } else {
+    ESP_LOGW(TAG, "DHT-11 read failed: %s", esp_err_to_name(result));
+    return false;
+  }
+}
+
+static void dht11_task(void *arg) {
+  ESP_LOGI(TAG, "🌡️  DHT-11 task started - reading sensor every %d seconds", DHT11_READ_INTERVAL_MS / 1000);
+  
+  while (1) {
+    if (dht11_initialized && publishing_active && sei_system_active) {
+      float temperature, humidity;
+      
+      if (dht11_read(&temperature, &humidity)) {
+        last_temperature = temperature;
+        last_humidity = humidity;
+        
+        ESP_LOGI(TAG, "🌡️  DHT-11: Temperature: %.1f°C, Humidity: %.1f%%", temperature, humidity);
+        
+        // Create complete JSON message for SEI
+        char json_message[300];
+        uint32_t timestamp = esp_timer_get_time() / 1000; // Convert to milliseconds
+        
+        snprintf(json_message, sizeof(json_message),
+                "{\"sensor\":\"DHT11\",\"temperature_c\":%.1f,\"humidity_percent\":%.1f,\"timestamp\":%" PRIu32 ",\"status\":\"ok\",\"type\":\"sensor_data\"}",
+                temperature, humidity, timestamp);
+        
+        if (sei_send_raw_json(json_message)) {
+          ESP_LOGI(TAG, "📤 DHT-11 data published via SEI as raw JSON");
+        } else {
+          ESP_LOGW(TAG, "⚠️ Failed to publish DHT-11 data via SEI");
+        }
+      } else {
+        ESP_LOGW(TAG, "⚠️ Failed to read DHT-11 sensor");
+        
+        // Send error status via SEI
+        char error_message[150];
+        uint32_t timestamp = esp_timer_get_time() / 1000; // Convert to milliseconds
+        snprintf(error_message, sizeof(error_message),
+                "{\"sensor\":\"DHT11\",\"timestamp\":%" PRIu32 ",\"status\":\"read_error\",\"type\":\"sensor_error\"}", timestamp);
+        sei_send_raw_json(error_message);
+      }
+    }
+    
+    // Wait for next reading interval
+    vTaskDelay(pdMS_TO_TICKS(DHT11_READ_INTERVAL_MS));
+  }
+}
+#endif
+
 // SEI message task - sends test messages every 3 seconds (if enabled)
 static void sei_message_task(void *arg) {
 #if SEI_ENABLE_TEST_MESSAGES
@@ -626,7 +815,6 @@ void app_main(void) {
            min_free_heap);
 
   // Initialize SEI system
-
   if (sei_init() && video_sei_hook_init()) {
     sei_system_active = true;
     ESP_LOGI(TAG, "📡 SEI system initialized successfully");
@@ -636,6 +824,17 @@ void app_main(void) {
     ESP_LOGE(TAG, "❌ Failed to initialize SEI system");
     sei_system_active = false;
   }
+
+#if SEI_ENABLE_DHT11
+  // Initialize DHT-11 sensor
+  if (dht11_init()) {
+    ESP_LOGI(TAG, "🌡️  DHT-11 sensor ready - readings will be published via SEI every %d seconds", DHT11_READ_INTERVAL_MS / 1000);
+  } else {
+    ESP_LOGE(TAG, "❌ DHT-11 sensor initialization failed");
+  }
+#else
+  ESP_LOGI(TAG, "🌡️  DHT-11 sensor support disabled in settings");
+#endif
 
   // Create button monitoring task with larger stack
   xTaskCreate(button_task, "button_task", 2048, NULL, 5, NULL);
@@ -649,6 +848,14 @@ void app_main(void) {
     ESP_LOGI(TAG, "📡 SEI test messages disabled - task not created");
 #endif
   }
+
+#if SEI_ENABLE_DHT11
+  // Create DHT-11 sensor task
+  if (dht11_initialized && sei_system_active) {
+    xTaskCreate(dht11_task, "dht11_task", 4096, NULL, 4, NULL);
+    ESP_LOGI(TAG, "🌡️  DHT-11 sensor task created successfully");
+  }
+#endif
 
   // Re-enable WiFi to test without SEI code
   network_init(WIFI_SSID, WIFI_PASSWORD, network_event_handler);

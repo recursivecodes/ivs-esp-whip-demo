@@ -41,6 +41,14 @@ bool sei_send_text(const char *text);
 bool sei_send_json(const char *role, const char *content);
 
 /**
+ * @brief Send raw JSON data via SEI without additional wrapping
+ * 
+ * @param json_data Complete JSON string to send as-is
+ * @return true if message queued successfully, false otherwise
+ */
+bool sei_send_raw_json(const char *json_data);
+
+/**
  * @brief Send a status message via SEI
  * 
  * @param status Status string

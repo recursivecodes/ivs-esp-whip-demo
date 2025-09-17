@@ -80,6 +80,11 @@ extern "C" {
  */
 #define SEI_ENABLE_TEST_MESSAGES true
 
+/**
+ * @brief  Enable DHT-11 sensor support for temperature and humidity readings via SEI
+ */
+#define SEI_ENABLE_DHT11 false
+
 #ifdef __cplusplus
 }
 #endif

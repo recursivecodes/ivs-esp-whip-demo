@@ -7,3 +7,5 @@ dependencies:
         version: "1.0.4"
         rules:
             - if: target in [esp32p4, esp32s3]
+    esp-idf-lib/dht:
+        version: "^1.1.7"

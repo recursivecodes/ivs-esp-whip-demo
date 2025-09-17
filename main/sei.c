@@ -106,6 +106,34 @@ bool sei_send_json(const char *role, const char *content) {
     return result;
 }
 
+bool sei_send_raw_json(const char *json_data) {
+    if (!g_sei_publisher) {
+        ESP_LOGE(TAG, "SEI publisher not initialized");
+        return false;
+    }
+    
+    if (!json_data) {
+        ESP_LOGE(TAG, "JSON data parameter is NULL");
+        return false;
+    }
+    
+    size_t json_len = strlen(json_data);
+    if (json_len >= SEI_MAX_PAYLOAD_SIZE) {
+        ESP_LOGW(TAG, "Raw JSON message too large (%zu bytes), truncating to %d", 
+                 json_len, SEI_MAX_PAYLOAD_SIZE - 1);
+    }
+    
+    bool result = sei_publisher_publish_json(g_sei_publisher, json_data, SEI_DEFAULT_REPEAT_COUNT);
+    if (result) {
+        ESP_LOGI(TAG, "📤 Queued raw JSON message: \"%.50s%s\"", 
+                 json_data, json_len > 50 ? "..." : "");
+    } else {
+        ESP_LOGE(TAG, "❌ Failed to queue raw JSON message");
+    }
+    
+    return result;
+}
+
 bool sei_send_status(const char *status, int value) {
     if (!g_sei_publisher) {
         ESP_LOGE(TAG, "SEI publisher not initialized");
