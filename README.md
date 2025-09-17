@@ -30,9 +30,15 @@ First, clone the required esp-webrtc-solution repository:
 git clone https://github.com/espressif/esp-webrtc-solution.git
 ```
 
-### 2. Update CMakeLists.txt
+### 2. Configure Build System
 
-Update the `CMakeLists.txt` file to point to your local esp-webrtc-solution directory:
+Copy the CMakeLists template and configure for your environment:
+
+```bash
+cp CMakeLists.txt.template CMakeLists.txt
+```
+
+Edit `CMakeLists.txt` and update the paths to point to your local esp-webrtc-solution directory:
 
 ```cmake
 list(APPEND EXTRA_COMPONENT_DIRS "/path/to/your/esp-webrtc-solution/components")
@@ -46,6 +52,8 @@ Copy the settings template and configure for your environment:
 ```bash
 cp main/settings.h.template main/settings.h
 ```
+
+**Note**: Both `CMakeLists.txt` and `main/settings.h` are excluded from git to keep your personal configuration private.
 
 Edit `main/settings.h` with your specific configuration:
 
