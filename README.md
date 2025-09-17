@@ -245,9 +245,8 @@ DHT-11 CLI commands (when enabled):
 
 Once streaming, you can view the live stream through:
 
-- Amazon IVS console (if stage is configured for playback)
-- Your application using the IVS Player SDK
-- WebRTC-enabled applications connected to the same stage
+- Amazon IVS console (for testing & verification - does not support audio playback or SEI consumption)
+- Your application using the Amazon IVS Web Broadcast SDK
 
 ## Technical Details
 
