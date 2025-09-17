@@ -216,6 +216,10 @@ This demo includes SEI (Supplemental Enhancement Information) publishing capabil
 
 The demo supports optional DHT-11 temperature and humidity sensor integration that publishes sensor readings as JSON metadata via SEI every 5 seconds during streaming. Uses the reliable esp-idf-lib DHT component library for robust sensor communication. For wiring instructions and configuration details, see [DHT11_SETUP.md](DHT11_SETUP.md).
 
+Once published, the DHT-11 data can be consumed via the Amazon IVS Web Broadcast SDK ([docs](https://docs.aws.amazon.com/ivs/latest/RealTimeUserGuide/web-publish-subscribe.html#sei-attributes-reading-sei-payloads)).
+
+![DHT UI](img/dht-front-end.png)
+
 #### SEI Test Messages
 
 The demo can automatically send test SEI messages every 3 seconds during streaming. This feature is controlled by the `SEI_ENABLE_TEST_MESSAGES` setting in `main/settings.h`:
