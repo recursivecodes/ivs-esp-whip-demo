@@ -49,14 +49,14 @@ Based on the J1 header pinout, connect the DHT-11 as follows:
 
 ### J1 Header Reference (Top View)
 
-Connect the DHT-11 to the red pins as shown below:
+Connect the DHT-11 to the pins as shown below (reference the colored wire from the table above):
 
 ```
 J1 Header Layout:
 Pin 1  [3V3]    🔴⚪️  [5V] Pin 2
 Pin 3  [VOUT]   ⚪️⚪️  [5V] Pin 4
-Pin 5  [GPIO8]  ⚪️🔴  [GND] Pin 6
-Pin 7  [GPIO23] 🔴⚪️  [GPIO37] Pin 8
+Pin 5  [GPIO8]  ⚪️⚫️  [GND] Pin 6
+Pin 7  [GPIO23] 🟢⚪️  [GPIO37] Pin 8
 Pin 9  [GND]    ⚪️⚪️  [GPIO38] Pin 10
 ...
 ```
