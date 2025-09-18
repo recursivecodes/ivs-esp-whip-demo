@@ -193,11 +193,11 @@ I (xxxx) SEI_PUBLISHER: 📡 Processed 1 SEI messages, frame size: 12880 -> 1330
 
 ## Hardware Notes
 
-- **Voltage**: DHT-11 works with 3.3V from the ESP32-P4 (no level shifting needed)
-- **Pull-up Resistor**: Most DHT-11 modules include a built-in pull-up resistor (4.7kΩ - 10kΩ)
-- **Update Rate**: DHT-11 sensors should not be read faster than once every 2 seconds
-- **Accuracy**: DHT-11 is a basic sensor; consider DHT-22 for better accuracy
-- **Library**: Uses the reliable esp-idf-lib DHT library for robust sensor communication
+- DHT-11 works with 3.3V from the ESP32-P4 (no level shifting needed)
+- Most DHT-11 modules include a built-in pull-up resistor (4.7kΩ - 10kΩ)
+- DHT-11 sensors should not be read faster than once every 2 seconds
+- DHT-11 is a basic sensor; consider DHT-22 for better accuracy
+- Uses the reliable esp-idf-lib DHT library for robust sensor communication
 
 ## Safety
 
@@ -208,7 +208,7 @@ I (xxxx) SEI_PUBLISHER: 📡 Processed 1 SEI messages, frame size: 12880 -> 1330
 
 ## Next Steps
 
-Once your DHT-11 is working:
+Once your DHT-11 is configured:
 
 1. Monitor the embedded sensor data in your video stream
 2. Build applications that consume the SEI metadata
