@@ -188,7 +188,7 @@ After booting, the board will:
 
 ### GPIO Control
 
-- **Button Press**: Press the GPIO button on the ESP32-P4 board to start/stop WHIP streaming
+- **Button Press**: Press the BOOT button on the ESP32-P4 board to start/stop WHIP streaming
 
 ### CLI Commands
 
@@ -218,7 +218,7 @@ The demo can automatically send test SEI messages every 3 seconds during streami
 - Set to `true` to enable automatic test messages (default)
 - Set to `false` to disable automatic test messages and only use manual CLI commands
 
-SEI CLI commands:
+### SEI CLI commands:
 
 - `sei_text <message>` : Send text message via SEI
 - `sei_json <role> <content>` : Send JSON message via SEI
@@ -227,7 +227,7 @@ SEI CLI commands:
 - `sei_clear` : Clear SEI message queue
 - `sei_test_hook` : Test SEI hook with fake frame (for debugging)
 
-DHT-11 CLI commands (when enabled):
+### DHT-11 CLI commands (when enabled):
 
 - `dht11_read` : Manually read DHT-11 sensor and publish via SEI
 - `dht11_status` : Show DHT-11 sensor status and last readings
