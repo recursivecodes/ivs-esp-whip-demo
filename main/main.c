@@ -74,7 +74,7 @@ static float last_humidity = 0.0;
 
 // Forward declarations
 static bool fetch_token(void);
-static void sei_message_task(void *arg); // Temporarily removed
+static void sei_message_task(void *arg); 
 #if SEI_ENABLE_DHT11
 static bool dht11_init(void);
 static bool dht11_read(float *temperature, float *humidity);

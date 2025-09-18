@@ -54,9 +54,17 @@ Edit `main/settings.h` with your specific configuration:
 - **WIFI_PASSWORD**: Your Wi-Fi password
 - **STAGE_ARN**: Your Amazon IVS stage ARN (format: `arn:aws:ivs:region:account:stage/stage-id`)
 - **TOKEN_API_URL**: Your token vending endpoint URL
+- **WHIP_TOKEN**: Fallback participant token (used if TOKEN_API_URL fails)
 - **PARTICIPANT_NAME**: Unique identifier for this ESP32 device
 - **SEI_ENABLE_TEST_MESSAGES**: Enable/disable automatic SEI test messages (true/false)
 - **SEI_ENABLE_DHT11**: Enable/disable DHT-11 sensor readings via SEI (true/false)
+
+#### Token Management
+
+The ESP32-P4 uses a two-tier token system for maximum reliability:
+
+1. **Primary**: Dynamic tokens from `TOKEN_API_URL` (recommended for production)
+2. **Fallback**: Static `WHIP_TOKEN` (used if API call fails)
 
 #### Token Vending Endpoint
 
@@ -85,6 +93,8 @@ The `TOKEN_API_URL` must point to a publicly accessible endpoint that:
   ```
 
 You can implement this using AWS Lambda or any web service that can call the IVS `CreateParticipantToken` API.
+
+**Token Fallback Behavior**: If the TOKEN_API_URL is unreachable or returns an error, the system automatically falls back to using the hardcoded `WHIP_TOKEN`. This ensures streaming can continue even if your token service is temporarily unavailable. For development and testing, you can set `WHIP_TOKEN` to a long-lived participant token and leave `TOKEN_API_URL` as a placeholder.
 
 #### Example Node.js Implementation
 
