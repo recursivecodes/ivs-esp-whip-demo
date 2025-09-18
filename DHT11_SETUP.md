@@ -183,8 +183,12 @@ I (xxxx) DHT11: DHT-11 readings will be published via SEI every 5 seconds
 During operation:
 
 ```
-I (xxxx) DHT11: Temperature: 23.5°C, Humidity: 65.2%
-I (xxxx) DHT11: DHT-11 data published via SEI
+I (xxxx) IVS_WHIP_DEMO: 🌡️  DHT-11: Temperature: 22.0°C, Humidity: 50.0%
+I (xxxx) SEI_PUBLISHER: 📡 Queued SEI message: 116 bytes, queue: 1/15, repeat: 3
+I (xxxx) SEI: 📤 Queued raw JSON message: "{"sensor":"DHT11","temperature_c":22.0,"humidity_p..."
+I (xxxx) IVS_WHIP_DEMO: 📤 DHT-11 data published via SEI as raw JSON
+I (xxxx) SEI_PUBLISHER: 📡 Inserted SEI unit: 140 bytes, repeated 3 times (regular frame)
+I (xxxx) SEI_PUBLISHER: 📡 Processed 1 SEI messages, frame size: 12880 -> 13300 bytes (regular frame)
 ```
 
 ## Hardware Notes
