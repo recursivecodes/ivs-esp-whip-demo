@@ -17,13 +17,15 @@ This implementation provides SEI (Supplemental Enhancement Information) NAL unit
 
 ## Expected Results
 
-```bash
-esp> sei_text "Hello from ESP32-P4"
-SEI text message queued: Hello from ESP32-P4
+If you have configured the DHT-11 portion ([DHT11_SETUP.md](./DHT11_SETUP.md)) of this application, your logs will look similar to the following:
 
-# Live streaming shows:
-SEI injected: 5208 -> 5568 bytes (+360)
-✅ SEI data successfully transmitted to WebRTC clients
+```bash
+I (65052) IVS_WHIP_DEMO: 🌡️  DHT-11: Temperature: 22.0°C, Humidity: 50.0%
+I (65052) SEI_PUBLISHER: 📡 Queued SEI message: 116 bytes, queue: 1/15, repeat: 3
+I (65062) SEI: 📤 Queued raw JSON message: "{"sensor":"DHT11","temperature_c":22.0,"humidity_p..."
+I (65062) IVS_WHIP_DEMO: 📤 DHT-11 data published via SEI as raw JSON
+I (65072) SEI_PUBLISHER: 📡 Inserted SEI unit: 140 bytes, repeated 3 times (regular frame)
+I (65092) SEI_PUBLISHER: 📡 Processed 1 SEI messages, frame size: 12880 -> 13300 bytes (regular frame)
 ```
 
 **Live Test Results**: SEI messages are successfully injected into live video frames and transmitted to WebRTC clients in real-time.
