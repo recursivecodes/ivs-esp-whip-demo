@@ -28,7 +28,7 @@ I (65072) SEI_PUBLISHER: 📡 Inserted SEI unit: 140 bytes, repeated 3 times (re
 I (65092) SEI_PUBLISHER: 📡 Processed 1 SEI messages, frame size: 12880 -> 13300 bytes (regular frame)
 ```
 
-**Live Test Results**: SEI messages are successfully injected into live video frames and transmitted to WebRTC clients in real-time.
+SEI messages are successfully injected into live video frames and transmitted to WebRTC clients in real-time.
 
 ## System Components
 
