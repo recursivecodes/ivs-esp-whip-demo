@@ -2,7 +2,7 @@
 
 ## Overview
 
-This standalone demo shows how to use an ESP32-P4 board as a WHIP publish client to stream media directly to Amazon IVS (Interactive Video Service) using WebRTC. This is a standalone version of the demo originally located in the [esp-webrtc-solution](https://github.com/espressif/esp-webrtc-solution) repository.
+This standalone demo shows how to use an ESP32-P4 board as a WHIP publish client to stream media directly to Amazon IVS (Interactive Video Service) using WebRTC. This is a standalone version of the demo originally located in the [esp-webrtc-solution](https://github.com/espressif/esp-webrtc-solution) repository, which is included as a git submodule for easy dependency management.
 
 ## Prerequisites
 
@@ -22,30 +22,21 @@ This standalone demo shows how to use an ESP32-P4 board as a WHIP publish client
 
 ## Setup Instructions
 
-### 1. Clone Dependencies
+### 1. Clone Repository with Submodules
 
-First, clone the required esp-webrtc-solution repository:
-
-```bash
-git clone https://github.com/espressif/esp-webrtc-solution.git
-```
-
-### 2. Configure Build System
-
-Copy the CMakeLists template and configure for your environment:
+Clone this repository with the required esp-webrtc-solution submodule:
 
 ```bash
-cp CMakeLists.txt.template CMakeLists.txt
+git clone --recurse-submodules https://github.com/your-username/your-repo-name.git
 ```
 
-Edit `CMakeLists.txt` and update the paths to point to your local esp-webrtc-solution directory:
+If you've already cloned without submodules, initialize them:
 
-```cmake
-list(APPEND EXTRA_COMPONENT_DIRS "/path/to/your/esp-webrtc-solution/components")
-list(APPEND EXTRA_COMPONENT_DIRS "/path/to/your/esp-webrtc-solution/solutions/common")
+```bash
+git submodule update --init --recursive
 ```
 
-### 3. Configure Settings
+### 2. Configure Settings
 
 Copy the settings template and configure for your environment:
 
@@ -53,7 +44,7 @@ Copy the settings template and configure for your environment:
 cp main/settings.h.template main/settings.h
 ```
 
-**Note**: Both `CMakeLists.txt` and `main/settings.h` are excluded from git to keep your personal configuration private.
+**Note**: `main/settings.h` is excluded from git to keep your personal configuration private.
 
 Edit `main/settings.h` with your specific configuration:
 
@@ -260,6 +251,6 @@ For detailed WebRTC connection flow, refer to the [esp-webrtc documentation](htt
 
 ## Troubleshooting
 
-- **Build errors**: Ensure CMakeLists.txt paths point to your local esp-webrtc-solution directory
+- **Build errors**: Ensure submodules are properly initialized with `git submodule update --init --recursive`
 - **Connection issues**: Verify your token endpoint is accessible and returns valid tokens
 - **Streaming problems**: Check that your IVS stage ARN is correct and the stage is active

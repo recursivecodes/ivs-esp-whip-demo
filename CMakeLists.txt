@@ -9,8 +9,8 @@ if("${IDF_TARGET}" STREQUAL "esp32p4")
     set(EXTRA_COMPONENT_DIRS "$ENV{IDF_PATH}/examples/ethernet/basic/components/ethernet_init")
 endif()
 
-# Update these paths to point to your local esp-webrtc-solution directory
-list(APPEND EXTRA_COMPONENT_DIRS "/path/to/your/esp-webrtc-solution/components")
-list(APPEND EXTRA_COMPONENT_DIRS "/path/to/your/esp-webrtc-solution/solutions/common")
+# ESP WebRTC solution components (included as submodule)
+list(APPEND EXTRA_COMPONENT_DIRS "esp-webrtc-solution/components")
+list(APPEND EXTRA_COMPONENT_DIRS "esp-webrtc-solution/solutions/common")
 
 project(ivs_whip_demo)
