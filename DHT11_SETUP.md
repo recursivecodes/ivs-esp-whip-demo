@@ -105,6 +105,9 @@ When `SEI_ENABLE_DHT11` is enabled, the system will:
 
 The DHT-11 readings are published as raw JSON via SEI in this format:
 
+> [!IMPORTANT]  
+> By default, the SEI implementation will repeat each message 3 times to reduce the chance of undelivered messages via dropped frames. If you use this demo, de-dupe on the client side by checking the `timestamp` value and ignoring duplicates. Repeat functionality is configurable. Refer to `max_retry_attempts` in `sei_publisher_init()`.
+
 ```json
 {
   "sensor": "DHT11",
