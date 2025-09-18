@@ -61,7 +61,7 @@ Edit `main/settings.h` with your specific configuration:
 
 #### Token Management
 
-The ESP32-P4 uses a two-tier token system for maximum reliability:
+This app uses a two-tier token system for maximum reliability:
 
 1. **Primary**: Dynamic tokens from `TOKEN_API_URL` (recommended for production)
 2. **Fallback**: Static `WHIP_TOKEN` (used if API call fails)
