@@ -27,7 +27,7 @@ This standalone demo shows how to use an ESP32-P4 board as a WHIP publish client
 Clone this repository with the required esp-webrtc-solution submodule:
 
 ```bash
-git clone --recurse-submodules https://github.com/your-username/your-repo-name.git
+git clone --recurse-submodules https://github.com/recursivecodes/ivs-esp-whip-demo.git
 ```
 
 If you've already cloned without submodules, initialize them:
