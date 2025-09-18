@@ -211,7 +211,7 @@ Once published, the DHT-11 data can be consumed via the Amazon IVS Web Broadcast
 
 ![DHT UI](img/dht-front-end.png)
 
-#### SEI Test Messages
+### SEI Test Messages
 
 The demo can automatically send test SEI messages every 3 seconds during streaming. This feature is controlled by the `SEI_ENABLE_TEST_MESSAGES` setting in `main/settings.h`:
 
