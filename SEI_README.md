@@ -2,7 +2,7 @@
 
 This implementation provides SEI (Supplemental Enhancement Information) NAL unit publishing capabilities for ESP32-P4 WebRTC streaming. It enables embedding metadata directly into H.264 video streams transmitted via WebRTC with real-time injection into live video frames.
 
-### ✅ CONFIRMED WORKING FEATURES:
+### Overview
 
 - **Live SEI Injection**: Real-time SEI data injection into WebRTC video streams
 - **Standards Compliant**: Proper H.264 SEI NAL units with UUID identification
@@ -15,7 +15,7 @@ This implementation provides SEI (Supplemental Enhancement Information) NAL unit
 - **Memory Safe**: Proper memory management with no leaks
 - **Performance Optimized**: Minimal impact on video streaming performance
 
-### 🧪 VERIFIED LIVE STREAMING RESULTS:
+### Expected Results
 
 ```bash
 esp> sei_text "Hello from ESP32-P4"
